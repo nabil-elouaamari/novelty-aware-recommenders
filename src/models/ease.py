@@ -1,9 +1,11 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 from src.models.base_model import BaseRecommender
+from src.pipelines.recommend import generate_recommendations
+
 
 class EASE(BaseRecommender):
-    def __init__(self, lambda_reg=5.0):
+    def __init__(self, lambda_reg=300.0):
         """
         EASE model for item-item collaborative filtering.
         :param lambda_reg: Regularization hyperparameter.
@@ -41,6 +43,9 @@ class EASE(BaseRecommender):
         :return: Predicted scores vector for user u.
         """
         return user_vector @ self.W
+
+    def recommend(self, train_df, test_in_df, top_k=20):
+        return generate_recommendations(self, train_df, test_in_df, top_k)
 
 
 if __name__ == "__main__":
