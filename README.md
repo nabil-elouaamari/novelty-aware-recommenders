@@ -3,10 +3,10 @@
 ## Research Question
 
 ### RQ1:
-_How does applying a novelty-weighted post-processing re-ranking step to the EASE recommender model affect the trade-off between accuracy and novelty?_
+_How does re-ranking EASE recommendations using genre-based item-to-history cosine novelty affect the accuracy–novelty trade-off?_
 
 ### RQ1a:
-_Can user-specific novelty weighting improve this trade-off compared to a fixed global novelty weight?_
+_Can user-specific novelty weighting, where users are grouped based on profile characteristics, improve the accuracy–novelty trade-off compared to a single global novelty weight?_
 
 ## Project Motivation
 Traditional recommender systems optimize accuracy, but this often leads to:
