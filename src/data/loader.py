@@ -5,8 +5,8 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT_DIR / "data" / "raw"
 
 def load_interactions(train=True):
-    fname = "train_interactions.csv" if train else "test_interactions_in.csv"
-    return pd.read_csv(DATA_DIR / fname)
+    filename = "train_interactions.csv" if train else "test_interactions_in.csv"
+    return pd.read_csv(DATA_DIR / filename)
 
 def load_games():
     return pd.read_csv(DATA_DIR / "games.csv")
