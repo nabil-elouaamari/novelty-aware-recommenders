@@ -213,3 +213,4 @@ data/raw/*.csv
 .idea/
 notebooks/*.csv
 notebooks/*.zip
+data/processed/
