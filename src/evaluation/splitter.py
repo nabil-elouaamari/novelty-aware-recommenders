@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
+from src.config import SEED
 
-def split_train_in_out(interactions: pd.DataFrame, seed: int = 42):
+def split_train_in_out(interactions: pd.DataFrame, seed: int = SEED):
     """
     Codabench-aligned per-user split.
     For each user, hold out exactly one interaction as test_out.

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import time
@@ -14,6 +16,7 @@ from src.evaluation.metrics import (
     calculate_item_coverage,
     calculate_item_gini
 )
+from src.config import N_EVAL_USERS, SEED
 
 def create_train_in_out(train_df, fold_in_ratio=0.8):
     print("[DEBUG] Creating fold-in/out split...")
@@ -124,8 +127,8 @@ def run_ease_lambda_sweep(
         lambdas=None,
         output_csv="ease_lambda_sweep.csv",
         fold_in_ratio=0.8,
-        max_users=3000,
-        seed=42
+        max_users=N_EVAL_USERS,
+        seed=SEED
 ):
     """
     Run a λ-sweep for EASE with fast offline evaluation.
@@ -186,8 +189,13 @@ def run_ease_lambda_sweep(
     # ----------------------------------------------------------------------
     # Save results
     # ----------------------------------------------------------------------
+    root_dir = Path(__file__).resolve().parents[2]
+    output_dir = root_dir / "results" / "sweeps"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     df = pd.DataFrame(results)
-    df.to_csv(output_csv, index=False)
-    print(f"[DEBUG] Saved sweep results to: {output_csv}")
+    output_path = output_dir / output_csv
+    df.to_csv(output_path, index=False)
+    print(f"[DEBUG] Saved sweep results to: {output_path}")
 
     return df

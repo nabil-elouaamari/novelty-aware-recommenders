@@ -1,6 +1,6 @@
 import pandas as pd
 import zipfile
-import os
+from pathlib import Path
 
 
 def save_submission(recs_df: pd.DataFrame, filename: str):
@@ -24,14 +24,19 @@ def save_submission(recs_df: pd.DataFrame, filename: str):
     # Sort by user_id for reproducibility (not required but recommended)
     recs_df = recs_df[["user_id", "item_id"]].sort_values(["user_id"])
 
+    # Define output directory at project root: `results/submissions`
+    project_root = Path(__file__).resolve().parents[2]
+    output_dir = project_root / "results" / "submissions"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # Save raw CSV
-    csv_path = f"{filename}.csv"
+    csv_path = output_dir / f"{filename}.csv"
     recs_df.to_csv(csv_path, index=False)
     print(f"Saved CSV: {csv_path}")
 
     # Save zipped CSV for Codabench
-    zip_path = f"{csv_path}.zip"
+    zip_path = Path(str(csv_path) + ".zip")
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-        zf.write(csv_path, arcname=os.path.basename(csv_path))
+        zf.write(str(csv_path), arcname=csv_path.name)
 
     print(f"Saved ZIP for Codabench: {zip_path}")
