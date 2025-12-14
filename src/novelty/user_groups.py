@@ -11,9 +11,9 @@ def assign_groups_by_profile_size(train_in, small=15, medium=50):
     """
     Returns dict: user_id -> novelty_weight
     Groups:
-      - small profile (< small) -> λ = 0.05
+      - small profile (< small) -> λ = 0.10
       - medium profile (< medium) -> λ = 0.20
-      - large profile (>= medium) -> λ = 0.50
+      - large profile (>= medium) -> λ = 0.30
     """
 
     counts = train_in["user_id"].value_counts()
@@ -22,11 +22,11 @@ def assign_groups_by_profile_size(train_in, small=15, medium=50):
 
     for user, c in counts.items():
         if c < small:
-            user_lambda[user] = 0.05
+            user_lambda[user] = 0.10
         elif c < medium:
             user_lambda[user] = 0.20
         else:
-            user_lambda[user] = 0.50
+            user_lambda[user] = 0.30
 
     return user_lambda
 
@@ -58,9 +58,9 @@ def compute_genre_entropy(history_items, item_genres):
 def assign_groups_by_genre_diversity(train_in, games_df):
     """
     Groups users based on genre entropy:
-      low entropy -> λ = 0.05
+      low entropy -> λ = 0.10
       medium -> λ = 0.20
-      high -> λ = 0.50
+      high -> λ = 0.30
     """
 
     # Build item_id -> genres list
@@ -84,11 +84,11 @@ def assign_groups_by_genre_diversity(train_in, games_df):
 
     for user, H in entropies.items():
         if H < q1:
-            user_lambda[user] = 0.05
+            user_lambda[user] = 0.10
         elif H < q2:
             user_lambda[user] = 0.20
         else:
-            user_lambda[user] = 0.50
+            user_lambda[user] = 0.30
 
     return user_lambda
 
