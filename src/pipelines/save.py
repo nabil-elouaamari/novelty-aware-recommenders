@@ -21,8 +21,7 @@ def save_submission(recs_df: pd.DataFrame, filename: str):
     if not {"user_id", "item_id"}.issubset(recs_df.columns):
         raise ValueError("DataFrame must contain columns 'user_id' and 'item_id'.")
 
-    # Sort by user_id for reproducibility (not required but recommended)
-    recs_df = recs_df[["user_id", "item_id"]].sort_values(["user_id"])
+    recs_df = recs_df[["user_id", "item_id"]]
 
     # Define output directory at project root: `results/submissions`
     project_root = Path(__file__).resolve().parents[2]

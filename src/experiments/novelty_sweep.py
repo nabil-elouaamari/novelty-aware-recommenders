@@ -8,7 +8,7 @@ from src.evaluation.splitter import split_train_in_out
 from src.evaluation.evaluator import evaluate_model
 from src.models.ease import EASE
 from src.novelty.rerank import rerank_with_novelty
-from src.config import LAMBDA_REG, TOP_K, N_EVAL_USERS, SEED
+from src.config import LAMBDA_REG, TOP_K, N_EVAL_USERS, SEED, POP_ALPHA
 
 # --------------------------------------------------
 # Helpers to load precomputed genre matrices - If you do not have them, run `notebooks/04-feature-engineering.ipynb` first
@@ -67,7 +67,7 @@ def run_novelty_sweep(
     item_distance = load_genre_distance()
 
     # 4) Train EASE once and get base recommendations
-    model = EASE(lambda_reg=ease_lambda_reg)
+    model = EASE(lambda_reg=ease_lambda_reg, alpha_pop=POP_ALPHA)
     recs_base = model.recommend(train_in, train_in, top_k=top_k_base)
 
     # 5) Evaluate plain EASE (no novelty) as lambda_nov = 0 baseline

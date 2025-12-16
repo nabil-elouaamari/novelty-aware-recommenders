@@ -5,19 +5,27 @@ from src.pipelines.recommend import generate_recommendations
 
 
 class EASE(BaseRecommender):
-    def __init__(self, lambda_reg: float = 100.0):
+    def __init__(self, lambda_reg: float = 100.0, alpha_pop: float = 0.15):
         """
         EASE model for item-item collaborative filtering.
+
         :param lambda_reg: Regularization hyperparameter.
+        :param alpha_pop: blending weight for item popularity (0 = no pop boost).
+                          Final score = (1-alpha) * ease_score + alpha * pop_score
         """
         self.lambda_reg = float(lambda_reg)
-        self.W = None # item-item weight matrix, shape (n_items, n_items)
+        self.W = None  # item-item weight matrix, shape (n_items, n_items)
+
+        # popularity blending
+        self.alpha_pop = float(alpha_pop)
+        self.popularity = None  # vector of length n_items, normalized to [0,1]
 
     def fit(self, X: csr_matrix):
         """
         X shape (n_users, n_items), binary implicit feedback matrix
-        """
 
+        Also computes item popularity used for score blending.
+        """
         # Gram matrix G = X^T X in float64 for stability
         G = (X.T @ X).toarray().astype(np.float64)
 
@@ -33,6 +41,19 @@ class EASE(BaseRecommender):
         np.fill_diagonal(B, 0.0)
 
         self.W = B
+
+        # compute item popularity from training matrix
+        # use column sums (number of users interacted), apply log1p and normalize to [0,1]
+        item_pop = np.asarray(X.sum(axis=0)).ravel().astype(np.float64)
+        if item_pop.size > 0:
+            item_pop = np.log1p(item_pop)  # compress heavy-tail
+            max_val = item_pop.max()
+            if max_val > 0:
+                item_pop = item_pop / max_val
+            else:
+                item_pop = item_pop
+        self.popularity = item_pop
+
         return self
 
     def predict_user(self, user_vector: np.ndarray) -> np.ndarray:
@@ -43,7 +64,15 @@ class EASE(BaseRecommender):
         """
         if self.W is None:
             raise RuntimeError("Call fit(X) before predict_user")
-        return user_vector @ self.W
+        ease_scores = user_vector @ self.W
+
+        # if popularity blending is enabled and vector available, blend scores
+        if self.alpha_pop and (self.popularity is not None) and len(self.popularity) == ease_scores.shape[0]:
+            scores = (1.0 - self.alpha_pop) * ease_scores + self.alpha_pop * self.popularity
+        else:
+            scores = ease_scores
+
+        return scores
 
     def recommend(self, train_df, test_in_df, top_k: int = 20):
         return generate_recommendations(self, train_df, test_in_df, top_k)
