@@ -7,7 +7,7 @@ from src.models.ease import EASE
 from src.data.loader import load_interactions
 from src.evaluation.splitter import split_train_in_out
 from src.evaluation.evaluator import evaluate_model
-from src.config import N_EVAL_USERS, SEED, TOP_K
+from src.config import N_EVAL_USERS, SEED, TOP_K, POP_ALPHA
 
 
 def _prepare_offline_split(
@@ -83,7 +83,7 @@ def run_ease_lambda_sweep(
     for lam in lambdas:
         print("[INFO] Evaluating lambda =", lam, "| progress:", round(len(results) / len(lambdas) * 100, 2), "%")
         # 1) model with current lambda
-        model = EASE(lambda_reg=float(lam))
+        model = EASE(lambda_reg=float(lam), alpha_pop=float(POP_ALPHA))
 
         # 2) recommendations (same protocol as in 02_ease_baseline)
         recs = model.recommend(
