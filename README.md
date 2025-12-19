@@ -105,8 +105,6 @@ The repository is organized as follows:
 │   ├── config.py                       # Global constants (lambda, top K, number of users, pop alpha, seeds)
 │   ├── data/
 │   │   ├── loader.py                   # load_interactions, load_games, etc.
-│   │   ├── mappings.py                 # ID mapping helpers if needed
-│   │   ├── matrix.py                   # user item matrix construction
 │   │   └── preprocess.py               # Filters, ID encoding
 │   ├── models/
 │   │   ├── base_model.py               # BaseRecommender interface

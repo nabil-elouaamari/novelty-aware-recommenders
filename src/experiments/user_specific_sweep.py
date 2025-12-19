@@ -1,6 +1,23 @@
+"""
+User-specific novelty experiments.
+
+This script compares three simple strategies for assigning per user
+novelty weights:
+
+  - profile: based on profile size (number of interactions)
+  - genre: based on genre entropy in the user history
+  - combined: average of profile-based and genre-based weights
+
+For each strategy, it reranks EASE recommendations with:
+  final_score(u, i) = s_ease(u, i) + lambda_u * novelty(u, i)
+
+And evaluates accuracy, novelty, and diversity metrics.
+"""
+
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 from src.data.loader import load_interactions, load_games
 from src.evaluation.splitter import split_train_in_out
@@ -14,12 +31,38 @@ from src.novelty.user_groups import (
 from src.config import LAMBDA_REG, TOP_K, N_EVAL_USERS, SEED
 
 
-def user_specific_rerank(recs_df, train_in, item_distance, user_lambda_map):
+def user_specific_rerank(
+    recs_df: pd.DataFrame,
+    train_in: pd.DataFrame,
+    item_distance: np.ndarray,
+    user_lambda_map: dict,
+) -> pd.DataFrame:
     """
-    Per-user novelty weighting:
-      final_score(u,i) = s + lambda_u * novelty(u,i)
-    """
+    Apply per user novelty weighting to a base recommendation list.
 
+    The new score is
+        final_score(u, i) = s + lambda_u * novelty(u, i)
+
+    Where novelty(u, i) is the average distance between candidate item i
+    and all items in user u's history.
+
+    Parameters
+    ----------
+    recs_df : pd.DataFrame
+        Base recommendation list with columns
+        ['user_id', 'item_id', 'score'].
+    train_in : pd.DataFrame
+        Fold in interactions, used to build user histories.
+    item_distance : np.ndarray
+        Item item distance matrix indexed by item_id.
+    user_lambda_map : dict
+        Mapping user_id -> novelty weight lambda_u.
+
+    Returns
+    -------
+    pd.DataFrame
+        Reranked recommendations with updated 'score' values.
+    """
     user_hist = train_in.groupby("user_id")["item_id"].apply(list)
     rows = []
 
@@ -33,18 +76,58 @@ def user_specific_rerank(recs_df, train_in, item_distance, user_lambda_map):
 
 
 def run_user_specific_sweep(
-    grouping="profile",   # "profile", "genre", "combined"
-    ease_lambda_reg=LAMBDA_REG,
-    top_k_eval=TOP_K,
-    top_k_base=100,
-    n_eval_users=N_EVAL_USERS,
-    seed=SEED,
-    output_csv=None,
-):
+    grouping: str = "profile",   # "profile", "genre", "combined"
+    ease_lambda_reg: float = LAMBDA_REG,
+    top_k_eval: int = TOP_K,
+    top_k_base: int = 100,
+    n_eval_users: int = N_EVAL_USERS,
+    seed: int = SEED,
+    output_csv: str | None = None,
+) -> dict:
     """
-    Evaluate user-specific novelty weighting.
-    """
+    Evaluate a user-specific novelty weighting strategy.
 
+    Steps
+    -----
+      1) Load full train_interactions and games.
+      2) Split interactions into train_in / train_out.
+      3) Sample up to n_eval_users users.
+      4) Train EASE on train_in and generate a base list of length
+         top_k_base per user.
+      5) Assign per user novelty weights lambda_u using one of:
+           - assign_groups_by_profile_size
+           - assign_groups_by_genre_diversity
+           - assign_groups_combined
+      6) Apply user_specific_rerank to adjust scores.
+      7) Sort and evaluate with evaluate_model.
+      8) Save metrics as a one-row CSV.
+
+    Parameters
+    ----------
+    grouping: {"profile", "genre", "combined"}, default "profile"
+        Which grouping strategy to use to assign lambda_u.
+    ease_lambda_reg : float, default LAMBDA_REG
+        Regularization value for the underlying EASE model.
+    top_k_eval : int, default TOP_K
+        Cutoff k for evaluation metrics.
+    top_k_base : int, default 100
+        Length of the base recommendation list before reranking.
+    n_eval_users : int, default N_EVAL_USERS
+        Maximum number of users in the offline split.
+    seed : int, default SEED
+        Random seed for splitting and sampling.
+    output_csv : str or None
+        Output file name under notebooks/results/sweeps. If None, a
+        default name user_specific_<grouping>.csv is used.
+
+    Returns
+    -------
+    dict
+        Dictionary of metrics as returned by evaluate_model, extended
+        with keys:
+          - grouping
+          - ease_lambda_reg
+    """
     rng = np.random.default_rng(seed)
 
     train = load_interactions(train=True)
@@ -64,7 +147,7 @@ def run_user_specific_sweep(
     item_similarity = np.load("../data/processed/genre_similarity.npy")
     item_distance = np.load("../data/processed/genre_distance.npy")
 
-    # EASE
+    # EASE baseline
     model = EASE(lambda_reg=ease_lambda_reg)
     recs_base = model.recommend(train_in, train_in, top_k=top_k_base)
 
@@ -76,7 +159,7 @@ def run_user_specific_sweep(
     elif grouping == "combined":
         user_lambda = assign_groups_combined(train_in, games)
     else:
-        raise ValueError("grouping must be profile | genre | combined")
+        raise ValueError("grouping must be 'profile', 'genre' or 'combined'")
 
     # rerank with user-specific weights
     recs_us = user_specific_rerank(
@@ -87,7 +170,8 @@ def run_user_specific_sweep(
     )
 
     recs_us = recs_us.sort_values(
-        ["user_id", "score"], ascending=[True, False]
+        ["user_id", "score"],
+        ascending=[True, False],
     ).reset_index(drop=True)
 
     # evaluate

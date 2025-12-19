@@ -1,4 +1,17 @@
+"""
+Offline lambda sweep for the EASE model.
+
+This script uses a Codabench style split where each user has one held-out interaction.
+For a list of candidate lambdas it:
+
+  - Fits EASE on train_in
+  - generates recommendations on train_in
+  - evaluates NDCG, recall, and other metrics with evaluate_model
+  - Saves results as a CSV under notebooks/results/sweeps
+"""
+
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -15,16 +28,33 @@ def _prepare_offline_split(
     seed: int = SEED,
 ):
     """
-    Prepare an offline train_in / train_out split that matches
-    the logic in 02_ease_baseline.ipynb:
+    Prepare an offline train_in / train_out split similar to the
+    protocol used in the baseline notebook.
 
-      - 1 holdout per user via split_train_in_out
-      - subsample up to max_users users for faster evaluation
+    Steps
+    -----
+      1) Load full train_interactions.
+      2) Apply split_train_in_out to get one held-out item per user.
+      3) Subsample up to max_users users with a holdout for faster runs.
+
+    Parameters
+    ----------
+    max_users : int, default N_EVAL_USERS
+        Maximum number of users to keep for the sweep.
+    seed : int, default SEED
+        Random seed for reproducible user sampling.
+
+    Returns
+    -------
+    train_in : pd.DataFrame
+        Fold in interactions.
+    train_out : pd.DataFrame
+        Held out interactions per sampled user.
     """
     # full training interactions
     train_full = load_interactions(train=True)
 
-    # Codabench-like split: one holdout per user
+    # Codabench style split: one holdout per user
     train_in_full, train_out_full = split_train_in_out(train_full, seed=seed)
 
     # subsample users with a holdout
@@ -46,30 +76,38 @@ def _prepare_offline_split(
 
 
 def run_ease_lambda_sweep(
-    lambdas: list[float],
+    lambdas: List[float],
     output_csv: str = "ease_lambda_sweep.csv",
     max_users: int = N_EVAL_USERS,
     seed: int = SEED,
 ) -> pd.DataFrame:
     """
-    Run a λ-sweep for EASE using the same offline protocol as
-    in 02_ease_baseline.ipynb.
+    Run a lambda sweep for EASE using the offline protocol from
+    _prepare_offline_split.
 
-    Shared setup (done once):
-      - load full train_interactions
-      - split into train_in / train_out (1 holdout per user)
-      - Subsample up to max_users users
-
-    Per λ:
-      - instantiate EASE(lambda_reg=λ)
-      - recommend on (train_in, train_in)
+    For each lambda:
+      - instantiate EASE(lambda_reg=lambda, alpha_pop=POP_ALPHA)
+      - generate recommendations on (train_in, train_in)
       - Evaluate with evaluate_model (ndcg, recall, coverage, gini, ...)
 
-    Results are saved to notebooks/results/sweeps/<output_csv> and also
-    returned as a DataFrame.
+    Parameters
+    ----------
+    lambdas : list of float
+        Candidate regularization values to evaluate.
+    output_csv : str, default "ease_lambda_sweep.csv"
+        File name for the saved CSV under notebooks/results/sweeps.
+    max_users : int, default N_EVAL_USERS
+        Maximum number of users to include in the evaluation split.
+    seed : int, default SEED
+        Random seed passed to the splitter.
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per lambda with all computed metrics.
     """
     if not lambdas:
-        raise ValueError("lambdas must be a non-empty list, e.g. [50, 100, 200].")
+        raise ValueError("lambdas must be a non empty list, for example [50, 100, 200].")
 
     # prepare to split once
     train_in, train_out = _prepare_offline_split(
@@ -81,25 +119,32 @@ def run_ease_lambda_sweep(
 
     print(f"[INFO] Running EASE sweep with {len(lambdas)} lambdas...")
     for lam in lambdas:
-        print("[INFO] Evaluating lambda =", lam, "| progress:", round(len(results) / len(lambdas) * 100, 2), "%")
+        print(
+            "[INFO] Evaluating lambda =",
+            lam,
+            "| progress:",
+            round(len(results) / len(lambdas) * 100, 2),
+            "%",
+        )
+
         # 1) model with current lambda
         model = EASE(lambda_reg=float(lam), alpha_pop=float(POP_ALPHA))
 
-        # 2) recommendations (same protocol as in 02_ease_baseline)
+        # 2) recommendations
         recs = model.recommend(
             train_in,
             train_in,
             top_k=TOP_K,
         )
 
-        # 3) evaluation (reuse central evaluator)
+        # 3) evaluation
         metrics = evaluate_model(
             recs,
             train_in,
             train_out,
-            publisher_mapper=None,     # skip publisher gini for speed
-            item_similarity=None,      # skip similarity-based metrics
-            item_distance=None,        # skip novelty here (can add if needed)
+            publisher_mapper=None,  # skip publisher gini for speed
+            item_similarity=None,   # skip similarity-based metrics
+            item_distance=None,     # skip novelty here
             k=TOP_K,
         )
 
