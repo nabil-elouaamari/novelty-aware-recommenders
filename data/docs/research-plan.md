@@ -12,7 +12,7 @@ By the end of this assignment, you will have a first research plan, ready to be 
 The first step to developing a research plan (and designing an offline evaluation experiment) is to identify the problem that we will be addressing. 
 We can also refer to the problem as the evaluation objective, as it is our goal to evaluate how well our solution addresses the problem(s) we care about.
 
-An evaluation objective is typically formulated from the perspective of one (or more) stakeholders, for example, the platform, users and item providers. 
+An evaluation objective is typically formulated from the perspective of one (or more) stakeholders, for example, the platform, users, and item providers. 
 Each of these stakeholders has goals, that can be achieved by designing a recommender system that has certain desired properties.
 
 Our offline evaluation experiment then evaluates whether the solution (algorithm) has more or less of the desired properties than a representative selection of other algorithms (the baselines).
@@ -148,7 +148,7 @@ There are different types of validity.
 In the context of your artificial intelligence project, the type of validity we care about most is internal validity: 
 Ruling out alternative explanations for the results of our offline evaluation experiment.
 To maximize internal validity, we have to consider how we might be unintentionally biasing our results.
-There are three major threats to internal validity: confounding, selection bias and researcher bias.
+There are three major threats to internal validity: confounding, selection bias, and researcher bias.
 Confounding is usually the result of treating the new recommendation algorithm and the baselines differently.
 Selection bias is a result of differences between the sample used in the evaluation and the population it was sampled from.
 The final (and most dangerous) threat is researcher bias: The fact that researchers are generally flexible regarding their experimental designs in terms of baselines, datasets, evaluation protocol, and performance measures may easily lead to researcher bias, where algorithm designers may only look for evidence that supports the superiority of their own method. 
@@ -162,7 +162,7 @@ To safeguard the internal validity of an experiment it is important to consider 
 
 #### Task
 
-Consider how you might introduce selection bias, confounding and researcher bias into your experiment, and describe
+Consider how you might introduce selection bias, confounding, and researcher bias into your experiment, and describe
 what countermeasures you will take in the design of your experiment to avoid it.
 
 #### Answer
@@ -179,7 +179,7 @@ Countermeasure:
 
 Countermeasure:
 - Classify users as explorer/loyal based only on their training interactions (for example, the number of different genres they played before the test period).
-- The experiment must treat both the baseline (EASE) and your novelty-augmented EASE: with the same input data, same filtering rules, same evaluation protocol and same tuning procedure.
+- The experiment must treat both the baseline (EASE) and your novelty-augmented EASE: with the same input data, same filtering rules, same evaluation protocol, and same tuning procedure.
 
 ##### 3. How I could introduce researcher bias (Am I (unintentionally) nudging results?):
 - Cherry-picking a λ that looks best on test; hiding λ settings that underperform.
@@ -202,13 +202,13 @@ Firstly, it means the experiment is demonstrably and reasonably free of errors a
 However, truly reliable experimental code should also be re-runnable, repeatable, reproducible, reusable, and replicable.  
 An experiment is re-runnable if it is executable, or in other words, if a "restart and run all" does not produce errors -- as many JuPyTer notebooks do when executed from top to bottom.
 An experiment is repeatable if it produces the same results each time it is run. 
-An experiment is reproducible if someone else can take the code, run it and reobtain the reported results. For example, when your lecturers run your JuPyTer notebooks at the end of the class to see whether it produces the results you describe in your paper.
+An experiment is reproducible if someone else can take the code, run it, and reobtain the reported results. For example, when your lecturers run your JuPyTer notebooks at the end of the class to see whether it produces the results you describe in your paper.
 An experiment reusable when it is easy to understand and modify, thus, when it is well-documented and simple. 
 An experiment is replicable when the description of the code in the report is sufficient to write the code from scratch and obtain similar results.  
 
 #### Task
 
-Consider how you can make your experiment reliable, re-runnable, repeatable, reproducible, reusable and replicable and describe
+Consider how you can make your experiment reliable, re-runnable, repeatable, reproducible, reusable, and replicable and describe
 what measures you will take in the design of your experiment to ensure it is.
 
 #### Answer
@@ -265,19 +265,28 @@ Please answer the following questions in the context of the dataset you will use
 
 #### Answer
 
-The dataset I will use for this project is the Steam video game interaction dataset.
-- When was the dataset collected?
-  - The dataset was collected from the Steam platform, primarily between 2010 and 2019
-- Over which timespan?
-  - The dataset spans nearly a decade, from 2010 to 2019.
-- In which region?
-  - Steam is an international platform, so the dataset includes users from various regions worldwide,
-- What sampling/filtering strategy was applied?
-  - /
-- How did users find the items in the dataset?
-  - /
-- What are the dataset statistics?
-  - /
+The dataset I will use for this project is a preprocessed version of Julian McAuley’s Steam dataset. 
+It contains purchase and playtime logs plus rich item metadata for games on the Steam platform. 
+The original data consists of purchase histories, reviews, and game features for Australian Steam users, collected between October 2010 and January 2018.
+
+- When was the dataset collected?  
+  The underlying data was collected between October 2010 and January 2018.
+
+- Over which timespan?  
+  Roughly 7 years of user activity on Steam, from late 2010 to early 2018.
+
+- In which region?  
+  This version of the dataset focuses on Australian Steam users.
+
+- What sampling/filtering strategy was applied?  
+  The public UCSD dataset was first constructed from Steam logs. Then the course version I use was further merged with an additional metadata source and downscaled to a more manageable size by the lecturer (for example, by subsetting users/items and keeping the most informative features). So my project starts from a preprocessed subset rather than the full raw Steam logs.
+
+- How did users find the items in the dataset?  
+  The dataset does not contain this directly, but on Steam users typically arrive at games through a mix of: browsing the store, searching by name or tag, reading reviews, curated lists, and personalized recommendations, plus sales and promotional pages.
+
+- What are the dataset statistics?  
+  In the course version, the interactions form a very sparse user item matrix: there are many users and many games, but each user only interacts with a small fraction of all available games. In the report I will summarize this with the number of users, number of games, total interactions and the resulting density (interactions divided by users times items).
+
 
 
 ### Data Preprocessing
@@ -285,7 +294,7 @@ The dataset I will use for this project is the Steam video game interaction data
 #### Task
 
 Please answer the following questions in the context of the hypothesis/research question you had in mind for your project:
-- Why do you want to filter, sample or otherwise preprocess the datasets?
+- Why do you want to filter, sample, or otherwise preprocess the datasets?
 - What types of filters/feature engineering do you want to apply?
 - What is the best way to apply it?
 - How does this filtering affect the dataset characteristics?
@@ -294,7 +303,7 @@ Please answer the following questions in the context of the hypothesis/research 
 
 #### Answer
 
-- Why do you want to filter, sample or otherwise preprocess the datasets?
+- Why do you want to filter, sample, or otherwise preprocess the datasets?
   - Remove users or games with too few interactions (to ensure statistical reliability).
   - Reduce computational cost so that re-ranking experiments can be run multiple times with different novelty weights (λ).
 - What types of filters/feature engineering do you want to apply?
@@ -323,8 +332,8 @@ Please answer the following questions in the context of the hypothesis/research 
 
 #### Task 
 Please answer the following questions in the context of the hypothesis/research question you had in mind for your project:
-- Do we have sufficient users in the datasets to split users into different sets?
-- How large a timeframe span our datasets?
+- Do we have enough users in the datasets to split users into different sets?
+- How large a timeframe spans our datasets?
 - Can I split it in a time-aware fashion? 
 - Is the order of interactions likely important in this application domain?
 - Are there large differences in the lengths of users' interaction histories in the datasets?
@@ -333,10 +342,10 @@ Please answer the following questions in the context of the hypothesis/research 
 
 #### Answer
 
-- Do we have sufficient users in the datasets to split users into different sets?
+- Do we have enough users in the datasets to split users into different sets?
   - Yes, the Steam dataset has a large user base, allowing for a robust train/validation/test split.
-- How large a timeframe span our datasets?
-  - The dataset includes user–game interactions collected over multiple years (approximately 2010–2019). However, in this provided version of the dataset, no explicit timestamp column is available for individual interactions. This means the temporal order of actions cannot be precisely reconstructed.
+- How large a timeframe spans our datasets?
+  - The dataset includes user game interactions collected over multiple years, between October 2010 and January 2018, for Australian Steam users.
 - Can I split it in a time-aware fashion?
   - Not directly. Since timestamps are not included, a true chronological split (training on older interactions and testing on newer ones) is not possible. Instead, I will apply a per-user random leave-one-out split, which is commonly used in implicit-feedback datasets without time information. This still preserves internal validity because each user contributes data to all subsets.
 - Is the order of interactions likely important in this application domain?

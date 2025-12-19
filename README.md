@@ -1,5 +1,6 @@
 # Novelty-Aware Recommendations on Steam  
-Studying the tradeoff between accuracy and novelty using EASE re ranking
+Studying the tradeoff between accuracy and novelty using EASE re ranking.
+The research plan can be found [here](data/docs/research-plan.md).
 
 ## 1. Research Questions
 
