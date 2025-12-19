@@ -121,12 +121,12 @@ def run_novelty_sweep(
         results.append(metrics)
 
     root_dir = Path(__file__).resolve().parents[2]
-    output_dir = root_dir / "results" / "sweeps"
+    output_dir = root_dir / "notebooks" / "results" / "sweeps"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.DataFrame(results)
     output_path = output_dir / output_csv
     df.to_csv(output_path, index=False)
-    print(f"[INFO] Saved novelty sweep results to: {output_path}")
+    print(f"[INFO] Saved novelty sweep submissions to: {output_path}")
 
     return df

@@ -23,9 +23,9 @@ def save_submission(recs_df: pd.DataFrame, filename: str):
 
     recs_df = recs_df[["user_id", "item_id"]]
 
-    # Define output directory at project root: `results/submissions`
+    # Define output directory at project root: `submissions/submissions`
     project_root = Path(__file__).resolve().parents[2]
-    output_dir = project_root / "results" / "submissions"
+    output_dir = project_root / "submissions" / "submissions"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Save raw CSV

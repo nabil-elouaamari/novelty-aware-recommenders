@@ -5,7 +5,7 @@ This project uses the Steam dataset provided in the "datasets.zip" package.
 Due to size limitations, the raw data is **not included in this repository**.
 
 To run the project:
-1. Download the dataset from https://huggingface.co/datasets/sunajcs/steam.
+1. Download the dataset from https://huggingface.co/datasets/sunajcs/steam/blob/main/datasets.zip.
 2. Extract all CSV files to:
     data/raw/
 

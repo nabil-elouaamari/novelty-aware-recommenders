@@ -65,7 +65,7 @@ def run_ease_lambda_sweep(
       - recommend on (train_in, train_in)
       - Evaluate with evaluate_model (ndcg, recall, coverage, gini, ...)
 
-    Results are saved to results/sweeps/<output_csv> and also
+    Results are saved to notebooks/results/sweeps/<output_csv> and also
     returned as a DataFrame.
     """
     if not lambdas:
@@ -110,7 +110,7 @@ def run_ease_lambda_sweep(
     df = pd.DataFrame(results)
 
     root_dir = Path(__file__).resolve().parents[2]
-    output_dir = root_dir / "results" / "sweeps"
+    output_dir = root_dir / "notebooks" / "results" / "sweeps"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = output_dir / output_csv

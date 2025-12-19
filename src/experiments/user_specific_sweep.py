@@ -109,12 +109,12 @@ def run_user_specific_sweep(
         output_csv = f"user_specific_{grouping}.csv"
 
     root_dir = Path(__file__).resolve().parents[2]
-    output_dir = root_dir / "results" / "sweeps"
+    output_dir = root_dir / "notebooks" / "results" / "sweeps"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.DataFrame([metrics])
     output_path = output_dir / output_csv
     df.to_csv(output_path, index=False)
-    print(f"[INFO] Saved sweep results to: {output_path}")
+    print(f"[INFO] Saved sweep submissions to: {output_path}")
 
     return metrics

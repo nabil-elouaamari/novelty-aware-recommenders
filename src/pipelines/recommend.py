@@ -6,12 +6,16 @@ from src.data.matrix import build_user_item_matrix
 
 from scipy.sparse import csr_matrix
 
-def build_user_histories(df: pd.DataFrame) -> dict[int, np.ndarray]:
+def build_user_histories(df: pd.DataFrame, min_playtime=None) -> dict[int, np.ndarray]:
     """
     Build a mapping user_id -> array of item_ids from the given interactions df.
 
     Assumes df has at least ['user_id', 'item_id'].
+    If min_playtime is given, only items with playtime >= min_playtime are included.
     """
+    if (min_playtime is not None) and ('playtime' in df.columns):
+        df = df[df['playtime'] >= min_playtime]
+
     user_hist = (
         df.groupby("user_id")["item_id"]
         .apply(lambda s: s.to_numpy(dtype=np.int64))
@@ -44,12 +48,13 @@ def build_interaction_matrix(interactions: pd.DataFrame) -> csr_matrix:
 def generate_recommendations(model,
                              train_df: pd.DataFrame,
                              test_in_df: pd.DataFrame,
-                             top_k: int = 20) -> pd.DataFrame:
+                             top_k: int = 20,
+                             min_playtime: int|None = None) -> pd.DataFrame:
     """
     Generate top k recommendations for each user in test_in_df.
 
     Training:
-      - EASE is fit on train_df only.
+      - EASE is fit on train_df only. (optionally filtered by min_playtime)
 
     Scoring:
       - User histories are built from test_in_df (fold-in interactions).
@@ -59,9 +64,13 @@ def generate_recommendations(model,
     Online (Codabench):
       - You call recommend(train_full, test_in, ...) so training and histories differ.
     """
+    # 0. Optionally filter train_df by min_playtime
+    train_for_matrix = train_df
+    if (min_playtime is not None) and ('playtime' in train_for_matrix.columns):
+        train_for_matrix = train_for_matrix[train_for_matrix['playtime'] >= min_playtime]
 
     # 1. Build training matrix and fit EASE
-    X_train = build_interaction_matrix(train_df)
+    X_train = build_interaction_matrix(train_for_matrix)
 
     if hasattr(model, "fit") and getattr(model, "W", None) is None:
         model.fit(X_train)
@@ -69,7 +78,7 @@ def generate_recommendations(model,
     n_items = X_train.shape[1]
 
     # 2. Build user histories from test_in_df
-    user_hist = build_user_histories(test_in_df)
+    user_hist = build_user_histories(test_in_df, min_playtime=min_playtime)
 
     # 3. Users we need to score are exactly those in test_in_df
     target_users = np.sort(test_in_df["user_id"].unique())

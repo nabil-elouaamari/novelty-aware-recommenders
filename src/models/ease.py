@@ -74,8 +74,8 @@ class EASE(BaseRecommender):
 
         return scores
 
-    def recommend(self, train_df, test_in_df, top_k: int = 20):
-        return generate_recommendations(self, train_df, test_in_df, top_k)
+    def recommend(self, train_df, test_in_df, top_k: int = 20, min_playtime: int|None = None):
+        return generate_recommendations(self, train_df, test_in_df, top_k, min_playtime=min_playtime)
 
 
 if __name__ == "__main__":
