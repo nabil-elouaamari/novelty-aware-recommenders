@@ -94,6 +94,19 @@ The project uses a Steam video game dataset with implicit feedback.
 
 ## 5. Project Structure
 
+```mermaid
+flowchart >
+    A[Raw data] --> B[Data loading]
+    B --> C[Offline split<br/>train_in / train_out]
+    C --> D[EASE model<br/>train + recommend]
+    
+    D --> E[Optional novelty<br/>re ranking]
+    E --> F[Optional novelty<br/>re ranking]
+    D --> F[Codabench submission]
+
+    style F fill:#bbf,stroke:#333,stroke-width:2px
+```
+
 The repository is organized as follows:
 
 ```text
