@@ -42,6 +42,7 @@ class EASE(BaseRecommender):
     """
 
     def __init__(self, lambda_reg: float = 100.0, alpha_pop: float = 0.15):
+        print(f'Initializing EASE model (lambda_reg={lambda_reg}, alpha_pop={alpha_pop})')
         self.lambda_reg = float(lambda_reg)
         self.W = None  # item item weight matrix, shape (n_items, n_items)
 

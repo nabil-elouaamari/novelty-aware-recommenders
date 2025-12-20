@@ -1,0 +1,2 @@
+ndcg,recall,user_coverage,item_gini,publisher_gini,item_coverage,intra_list_similarity,novelty,grouping,ease_lambda_reg
+0.21410419589495633,0.39225,1.0,0.7952271628498727,0.7972572139087958,0.06728299948638931,0.31567645,0.65892714,genre,300

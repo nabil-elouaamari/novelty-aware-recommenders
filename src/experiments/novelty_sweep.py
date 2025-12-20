@@ -30,14 +30,14 @@ from src.config import LAMBDA_REG, TOP_K, N_EVAL_USERS, SEED, POP_ALPHA
 # --------------------------------------------------
 # Helpers to load precomputed genre matrices
 # --------------------------------------------------
-def load_genre_similarity(path: str = "../data/processed/genre_similarity.npy"):
+def load_genre_similarity(path: str = "results/processed/genre_similarity.npy"):
     """
     Load precomputed item item genre similarity matrix.
     """
     return np.load(path)
 
 
-def load_genre_distance(path: str = "../data/processed/genre_distance.npy"):
+def load_genre_distance(path: str = "results/processed/genre_distance.npy"):
     """
     Load precomputed item item genre distance matrix.
     """
@@ -96,8 +96,7 @@ def run_novelty_sweep(
         One row per configuration with all metrics.
     """
     if novelty_lambdas is None:
-        # include 0 (no novelty) plus a range of positive weights
-        novelty_lambdas = [0.0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0]
+        raise ValueError("novelty_lambdas must be provided. E.g. [0.0, 0.01, 0.1, 0.5, 1.0]")
 
     rng = np.random.default_rng(seed)
 

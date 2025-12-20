@@ -211,6 +211,5 @@ data/raw/*.csv
 
 # Generated files/folders
 .idea/
-*.csv
+*.npy
 *.zip
-data/processed/

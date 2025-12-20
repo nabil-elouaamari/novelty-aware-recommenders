@@ -144,8 +144,8 @@ def run_user_specific_sweep(
     train_in = train_in_full[train_in_full["user_id"].isin(sample_users)]
     train_out = train_out_full[train_out_full["user_id"].isin(sample_users)]
 
-    item_similarity = np.load("../data/processed/genre_similarity.npy")
-    item_distance = np.load("../data/processed/genre_distance.npy")
+    item_similarity = np.load("results/processed/genre_similarity.npy")
+    item_distance = np.load("results/processed/genre_distance.npy")
 
     # EASE baseline
     model = EASE(lambda_reg=ease_lambda_reg)
